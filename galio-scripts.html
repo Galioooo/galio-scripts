@@ -14,6 +14,101 @@
 <style>
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
+/* SPLASH */
+.splash {
+  position: fixed;
+  inset: 0;
+  background: #0a0a0f;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.splash.hide {
+  opacity: 0;
+  transform: scale(1.04);
+  pointer-events: none;
+}
+
+.splash-logo {
+  font-size: 64px;
+  font-weight: 900;
+  color: #c8f135;
+  letter-spacing: -3px;
+  opacity: 0;
+  transform: translateY(30px) scale(0.9);
+  animation: splashLogo 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s forwards;
+}
+
+.splash-logo span {
+  color: #e8e8f0;
+}
+
+.splash-line {
+  width: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #c8f135, transparent);
+  animation: expandLine 0.9s ease 0.7s forwards;
+}
+
+.splash-text {
+  font-family: 'Georgia', serif;
+  font-size: 15px;
+  color: #6b6b80;
+  letter-spacing: 0.5px;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeUp 0.6s ease 1.2s forwards;
+  text-align: center;
+  padding: 0 40px;
+  line-height: 1.7;
+}
+
+.splash-text em {
+  color: #c8f135;
+  font-style: italic;
+  font-size: 17px;
+}
+
+.splash-dots {
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  animation: fadeUp 0.4s ease 1.6s forwards;
+}
+
+.splash-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #3a3a50;
+  animation: pulse 1.2s ease infinite;
+}
+
+.splash-dot:nth-child(2) { animation-delay: 0.2s; }
+.splash-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes splashLogo {
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes expandLine {
+  to { width: 180px; }
+}
+
+@keyframes pulse {
+  0%, 100% { background: #3a3a50; transform: scale(1); }
+  50% { background: #c8f135; transform: scale(1.4); }
+}
+
 :root {
   --bg: #0a0a0f;
   --surface: #111118;
@@ -454,6 +549,43 @@ html, body {
 
 mark { background:rgba(200,241,53,0.2); color:var(--accent); border-radius:3px; padding:0 2px; }
 
+/* FAB */
+.fab {
+  position: fixed;
+  bottom: calc(70px + var(--safe-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: 100px;
+  padding: 14px 28px;
+  font-family: 'Cairo', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 30px rgba(200,241,53,0.35);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  white-space: nowrap;
+}
+
+.fab:active { transform: translateX(-50%) scale(0.94); }
+
+@media (min-width: 768px) {
+  .fab {
+    bottom: calc(20px + var(--safe-bottom));
+    left: auto;
+    right: 28px;
+    transform: none;
+    border-radius: 16px;
+  }
+  .fab:active { transform: scale(0.94); }
+}
+
 /* DESKTOP */
 @media (min-width: 768px) {
   .header { padding: 16px 28px; }
@@ -508,13 +640,25 @@ mark { background:rgba(200,241,53,0.2); color:var(--accent); border-radius:3px; 
 </style>
 </head>
 <body>
+
+<!-- SPLASH -->
+<div class="splash" id="splash">
+  <div class="splash-logo">Gali<span>o</span></div>
+  <div class="splash-line"></div>
+  <div class="splash-text">Someday I will be a<br><em>legend</em></div>
+  <div class="splash-dots">
+    <div class="splash-dot"></div>
+    <div class="splash-dot"></div>
+    <div class="splash-dot"></div>
+  </div>
+</div>
+
 <div class="app">
   <div class="header">
     <div class="logo">
       <span class="logo-text">Galio</span>
       <span class="logo-sub">Scripts</span>
     </div>
-    <button class="header-btn" onclick="openNew()">＋ جديد</button>
   </div>
 
   <div class="search-bar">
@@ -542,6 +686,9 @@ mark { background:rgba(200,241,53,0.2); color:var(--accent); border-radius:3px; 
     <div class="stat"><div class="stat-n" id="sP">0</div><div class="stat-l">اتنشر</div></div>
   </div>
 </div>
+
+<!-- FAB -->
+<button class="fab" onclick="openNew()">＋ سكريبت جديد</button>
 
 <!-- EDIT -->
 <div class="overlay" id="eO" onclick="closeEdit()"></div>
@@ -714,9 +861,10 @@ function openEdit(id){
   document.querySelectorAll('.pb').forEach(b=>b.classList.toggle('on',ePlats.includes(b.dataset.p)));
   document.getElementById('eO').classList.add('open');
   document.getElementById('eS').classList.add('open');
+  pushState('edit');
 }
 
-function closeEdit(){document.getElementById('eO').classList.remove('open');document.getElementById('eS').classList.remove('open');}
+function closeEdit(){saveDraft();closeEditNoHistory();history.back();}
 
 function toggleP(btn){btn.classList.toggle('on');const p=btn.dataset.p;if(ePlats.includes(p))ePlats=ePlats.filter(x=>x!==p);else ePlats.push(p);}
 
@@ -736,7 +884,8 @@ function saveScript(){
   }else{
     scripts.unshift({id:Date.now().toString(),title,content,tags:[...eTags],platforms:[...ePlats],status,duration,createdAt:Date.now(),updatedAt:Date.now()});
   }
-  save();closeEdit();render();
+  save();closeEditNoHistory();history.back();render();
+  localStorage.removeItem('galio_draft');
   showToast(editId?'✅ اتحفظ!':'🎉 اتضاف!');
 }
 
@@ -753,9 +902,10 @@ function openView(id){
   const b=document.getElementById('cpB');b.textContent='📋 نسخ';b.className='vb p';
   document.getElementById('vO').classList.add('open');
   document.getElementById('vS').classList.add('open');
+  pushState('view');
 }
 
-function closeView(){document.getElementById('vO').classList.remove('open');document.getElementById('vS').classList.remove('open');}
+function closeView(){closeViewNoHistory();history.back();}
 
 function copyV(){
   const s=scripts.find(x=>x.id===viewId);if(!s)return;
@@ -769,7 +919,7 @@ function editFV(){closeView();openEdit(viewId);}
 function dupFV(){const s=scripts.find(x=>x.id===viewId);if(!s)return;scripts.unshift({...s,id:Date.now().toString(),title:s.title+' (نسخة)',createdAt:Date.now(),updatedAt:Date.now(),status:'draft'});save();closeView();render();showToast('⧉ اتعملت نسخة!');}
 function delFV(){if(!confirm('مسح؟'))return;scripts=scripts.filter(s=>s.id!==viewId);save();closeView();render();showToast('🗑 اتمسح');}
 
-function closeAct(){document.getElementById('aO').classList.remove('open');document.getElementById('aS').classList.remove('open');}
+function closeAct(){closeActNoHistory();history.back();}
 function actCopy(){const s=scripts.find(x=>x.id===actId);if(!s)return;navigator.clipboard.writeText(s.content).then(()=>showToast('📋 اتنسخ!'));closeAct();}
 function actEdit(){closeAct();openEdit(actId);}
 function actDup(){const s=scripts.find(x=>x.id===actId);if(!s)return;scripts.unshift({...s,id:Date.now().toString(),title:s.title+' (نسخة)',createdAt:Date.now(),updatedAt:Date.now(),status:'draft'});save();render();closeAct();showToast('⧉ اتعملت نسخة!');}
@@ -780,7 +930,7 @@ let pt;
 document.addEventListener('touchstart',e=>{
   const card=e.target.closest('.card');if(!card)return;
   const id=card.getAttribute('onclick').match(/'([^']+)'/)[1];
-  pt=setTimeout(()=>{actId=id;document.getElementById('aO').classList.add('open');document.getElementById('aS').classList.add('open');},600);
+  pt=setTimeout(()=>{actId=id;document.getElementById('aO').classList.add('open');document.getElementById('aS').classList.add('open');pushState('action');},600);
 },{passive:true});
 document.addEventListener('touchend',()=>clearTimeout(pt),{passive:true});
 document.addEventListener('touchmove',()=>clearTimeout(pt),{passive:true});
@@ -789,10 +939,66 @@ document.addEventListener('contextmenu',e=>{
   const card=e.target.closest('.card');if(!card)return;
   e.preventDefault();
   const id=card.getAttribute('onclick').match(/'([^']+)'/)[1];
-  actId=id;document.getElementById('aO').classList.add('open');document.getElementById('aS').classList.add('open');
+  actId=id;document.getElementById('aO').classList.add('open');document.getElementById('aS').classList.add('open');pushState('action');
 });
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeEdit();closeView();closeAct();}});
+
+// BACK BUTTON (Android)
+function pushState(name) { history.pushState({panel: name}, ''); }
+
+function openNew(){
+  editId=null;eTags=[];ePlats=[];
+  document.getElementById('eT').textContent='سكريبت جديد';
+  // Restore draft if exists
+  const draft = JSON.parse(localStorage.getItem('galio_draft')||'null');
+  document.getElementById('fT').value = draft ? draft.title : '';
+  document.getElementById('fC').value = draft ? draft.content : '';
+  document.getElementById('fSt').value = draft ? draft.status : 'draft';
+  document.getElementById('fD').value = draft ? draft.duration : '';
+  eTags = draft ? (draft.tags||[]) : [];
+  ePlats = draft ? (draft.platforms||[]) : [];
+  renderTags();
+  document.querySelectorAll('.pb').forEach(b=>b.classList.toggle('on',ePlats.includes(b.dataset.p)));
+  document.getElementById('eO').classList.add('open');
+  document.getElementById('eS').classList.add('open');
+  pushState('edit');
+  setTimeout(()=>document.getElementById('fT').focus(),400);
+}
+
+// Autosave draft while typing
+['fT','fC','fSt','fD'].forEach(id => {
+  const el = document.getElementById(id);
+  if(el) el.addEventListener('input', saveDraft);
+});
+
+function saveDraft(){
+  if(editId) return; // only for new scripts
+  const draft = {
+    title: document.getElementById('fT').value,
+    content: document.getElementById('fC').value,
+    status: document.getElementById('fSt').value,
+    duration: document.getElementById('fD').value,
+    tags: [...eTags],
+    platforms: [...ePlats],
+  };
+  localStorage.setItem('galio_draft', JSON.stringify(draft));
+}
+
+window.addEventListener('popstate', e => {
+  if(document.getElementById('eS').classList.contains('open')){
+    saveDraft();
+    closeEditNoHistory();
+  } else if(document.getElementById('vS').classList.contains('open')){
+    closeViewNoHistory();
+  } else if(document.getElementById('aS').classList.contains('open')){
+    closeActNoHistory();
+  }
+});
+
+function closeEditNoHistory(){document.getElementById('eO').classList.remove('open');document.getElementById('eS').classList.remove('open');}
+function closeViewNoHistory(){document.getElementById('vO').classList.remove('open');document.getElementById('vS').classList.remove('open');}
+function closeActNoHistory(){document.getElementById('aO').classList.remove('open');document.getElementById('aS').classList.remove('open');}
 
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 
@@ -804,6 +1010,13 @@ if(!scripts.length){
 }
 
 render();
+
+// SPLASH
+setTimeout(() => {
+  const splash = document.getElementById('splash');
+  splash.classList.add('hide');
+  setTimeout(() => splash.remove(), 700);
+}, 2400);
 </script>
 </body>
 </html>
