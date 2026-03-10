@@ -1,4 +1,4 @@
-const CACHE = 'galio-v1';
+const CACHE = 'galio-v3';
 const FILES = ['./galio-scripts.html', './galio-icon.svg', './manifest.json'];
 
 self.addEventListener('install', e => {
